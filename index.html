@@ -24,7 +24,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; }
 body { font-family: 'Montserrat', Arial, sans-serif; background: var(--dark); }
 input, textarea { user-select: text; -webkit-user-select: text; }
 
-.app { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+.app { width: 100vw; height: 100vh; height: 100dvh; position: relative; overflow: hidden; }
 
 /* SCREENS */
 .screen {
@@ -131,13 +131,11 @@ input, textarea { user-select: text; -webkit-user-select: text; }
 }
 #ss-video {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0;
+  width: 100%;
   height: 100%;
-  width: auto;
-  min-width: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  background: #000;
   display: block;
 }
 .ss-fallback {
@@ -583,6 +581,7 @@ input, textarea { user-select: text; -webkit-user-select: text; }
 .game-select-card:active { transform: scale(0.97); }
 .game-select-card:hover  { border-color: var(--navy); background: var(--white); }
 
+.gs-text-wrap { display: flex; flex-direction: column; gap: 1.4vh; }
 .gs-icon { font-size: clamp(56px, 10vh, 110px); line-height: 1; }
 .gs-name {
   font-size: clamp(26px, 4.5vh, 52px);
@@ -1006,6 +1005,52 @@ input, textarea { user-select: text; -webkit-user-select: text; }
   .game-select-card:hover { transform: translateY(-6px); box-shadow: 0 12px 40px rgba(45,50,119,.15); }
   .box-card:hover { border-color: rgba(255,230,0,.7); background: rgba(255,255,255,.13); transform: translateY(-6px) scale(1.03); }
 }
+
+/* ================================================================
+   MOBILE OPTIMIZATION (phones)
+================================================================ */
+@media (max-width: 600px) {
+
+  /* Welcome */
+  #s-welcome { padding: 6vh 7vw; gap: clamp(18px, 3vh, 30px); }
+  #s-welcome .logo-img { width: clamp(180px, 64vw, 320px); }
+  .welcome-tagline { font-size: clamp(17px, 2.4vh, 24px); max-width: 86vw; }
+  .welcome-disclaimer { max-width: 84vw; }
+  .btn-huge { font-size: clamp(20px, 3vh, 28px); padding: clamp(18px, 2.6vh, 24px) clamp(48px, 16vw, 80px); width: auto; }
+
+  /* Form */
+  #s-form { padding: 5vh 7vw; }
+  .top-logos .logo-img { height: clamp(34px, 6vh, 50px); }
+  .section-title { font-size: clamp(30px, 5.5vh, 44px); }
+  .form-group input { font-size: clamp(17px, 2.6vh, 22px); padding: clamp(15px, 2.2vh, 20px) 18px; }
+
+  /* Question — answers stack in a single column for readability */
+  .q-top .logo-img { width: clamp(150px, 60vw, 260px); }
+  .opts-grid { grid-template-columns: 1fr; gap: clamp(10px, 1.6vh, 16px); }
+  .opt-btn { min-height: clamp(54px, 9vh, 78px); }
+
+  /* Game select — stack the two cards vertically */
+  .game-select-row { flex-direction: column; gap: 16px; margin-top: 2vh; }
+  .game-select-card { flex-direction: row; padding: 20px 22px; gap: 18px; text-align: left; align-items: center; }
+  .gs-icon { font-size: clamp(44px, 8vh, 60px); flex-shrink: 0; }
+  .gs-text-wrap { flex: 1; }
+  .gs-name { font-size: clamp(22px, 3.4vh, 30px); }
+  .gs-desc { font-size: clamp(13px, 1.8vh, 16px); }
+
+  /* Boxes — fit 3 across on narrow screens */
+  .boxes-row { gap: 10px; }
+  .box-card { width: clamp(92px, 28vw, 130px); height: clamp(140px, 26vh, 200px); }
+
+  /* Memotest — use more width */
+  .memo-grid { width: min(90vw, 90vw); gap: 8px; }
+
+  /* Prize / result screens */
+  .prize-title { font-size: clamp(40px, 9vh, 64px); }
+  .result-big-title { font-size: clamp(36px, 8vh, 56px); }
+
+  /* Back button a touch smaller */
+  #btn-back-home { bottom: 16px; padding: 11px 28px; }
+}
 </style>
 </head>
 <body>
@@ -1149,13 +1194,17 @@ input, textarea { user-select: text; -webkit-user-select: text; }
   <div class="game-select-row">
     <button class="game-select-card" onclick="enterBoxGame()">
       <div class="gs-icon">📦</div>
-      <div class="gs-name">Cajas</div>
-      <div class="gs-desc">Elegí 1 de 3 cajas y descubrí si tiene el premio</div>
+      <div class="gs-text-wrap">
+        <div class="gs-name">Cajas</div>
+        <div class="gs-desc">Elegí 1 de 3 cajas y descubrí si tiene el premio</div>
+      </div>
     </button>
     <button class="game-select-card" onclick="enterMemotest()">
       <div class="gs-icon">🃏</div>
-      <div class="gs-name">Memotest</div>
-      <div class="gs-desc">Memorizá dónde está el premio y después elegí una carta</div>
+      <div class="gs-text-wrap">
+        <div class="gs-name">Memotest</div>
+        <div class="gs-desc">Memorizá dónde está el premio y después elegí una carta</div>
+      </div>
     </button>
   </div>
 </div>
