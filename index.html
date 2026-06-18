@@ -222,7 +222,7 @@ input, textarea { user-select: text; -webkit-user-select: text; }
   background: var(--white);
   align-items: center;
   justify-content: center;
-  padding: 6vh 10vw;
+  padding: 3.5vh 10vw;
   gap: 0;
 }
 
@@ -266,7 +266,7 @@ input, textarea { user-select: text; -webkit-user-select: text; }
   font-weight: 500;
   color: #999;
   text-align: center;
-  margin-bottom: 3.5vh;
+  margin-bottom: 2vh;
 }
 
 .form-fields {
@@ -274,7 +274,7 @@ input, textarea { user-select: text; -webkit-user-select: text; }
   max-width: 680px;
   display: flex;
   flex-direction: column;
-  gap: 2.8vh;
+  gap: 1.8vh;
 }
 .form-group { display: flex; flex-direction: column; gap: 1.2vh; }
 .form-group label {
@@ -1127,6 +1127,14 @@ input, textarea { user-select: text; -webkit-user-select: text; }
       <label>Email <span class="opt">(opcional)</span></label>
       <input type="email" id="f-email" placeholder="tu@email.com" autocomplete="off">
     </div>
+    <div class="form-group">
+      <label>Profesión / Oficio <span class="opt">(opcional)</span></label>
+      <input type="text" id="f-profesion" placeholder="Ej: Electricista, Plomero..." autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label>Empresa <span class="opt">(opcional)</span></label>
+      <input type="text" id="f-empresa" placeholder="Ej: Constructora XYZ" autocomplete="off">
+    </div>
     <button class="btn-primary" id="btn-form-next" onclick="startRound()">Continuar →</button>
   </div>
 </div>
@@ -1180,51 +1188,6 @@ input, textarea { user-select: text; -webkit-user-select: text; }
 </div>
 
 <!-- ============================================================
-     GAME SELECT
-============================================================ -->
-<div class="screen" id="s-game-select">
-  <div class="top-logos">
-    <img class="logo-img" src="images/logo-ml.svg" alt="ML"
-        >
-  </div>
-  <div class="section-eyebrow">¡Trivia completada!</div>
-  <div class="section-title">Elegí tu juego</div>
-  <div class="yellow-bar"></div>
-  <p class="section-sub">¿Cuál preferís para jugar por el premio?</p>
-  <div class="game-select-row">
-    <button class="game-select-card" onclick="enterBoxGame()">
-      <div class="gs-icon">📦</div>
-      <div class="gs-text-wrap">
-        <div class="gs-name">Cajas</div>
-        <div class="gs-desc">Elegí 1 de 3 cajas y descubrí si tiene el premio</div>
-      </div>
-    </button>
-    <button class="game-select-card" onclick="enterMemotest()">
-      <div class="gs-icon">🃏</div>
-      <div class="gs-text-wrap">
-        <div class="gs-name">Memotest</div>
-        <div class="gs-desc">Memorizá dónde está el premio y después elegí una carta</div>
-      </div>
-    </button>
-  </div>
-</div>
-
-<!-- ============================================================
-     MEMOTEST
-============================================================ -->
-<div class="screen" id="s-memo">
-  <div class="boxes-header-logos">
-    <img class="logo-img" src="images/logo-ml.svg" alt="ML"
-        >
-  </div>
-  <div class="boxes-main">
-    <div class="boxes-title" id="memo-title">¡Memorizá!</div>
-    <p class="boxes-sub" id="memo-sub">Fijate dónde está el premio...</p>
-    <div class="memo-grid" id="memo-grid"></div>
-  </div>
-</div>
-
-<!-- ============================================================
      BOX GAME
 ============================================================ -->
 <div class="screen" id="s-boxes">
@@ -1234,8 +1197,8 @@ input, textarea { user-select: text; -webkit-user-select: text; }
   </div>
 
   <div class="boxes-main">
-    <div class="boxes-title">¡Elegí tu caja!<br>Elegí una caja</div>
-    <p class="boxes-sub">Solo una tiene el premio... ¿Cuál elegís?</p>
+    <div class="boxes-title" id="boxes-title">¡Elegí tu caja!</div>
+    <p class="boxes-sub" id="boxes-sub">Dos de las tres cajas tienen el premio. ¿Cuál elegís?</p>
 
     <div class="boxes-row">
       <div class="box-card" id="box-0" onclick="pickBox(0)">
@@ -1325,6 +1288,8 @@ input, textarea { user-select: text; -webkit-user-select: text; }
               <th>Nombre</th>
               <th>Teléfono</th>
               <th>Email</th>
+              <th>Profesión</th>
+              <th>Empresa</th>
               <th>Resultado</th>
             </tr>
           </thead>
@@ -1343,12 +1308,19 @@ input, textarea { user-select: text; -webkit-user-select: text; }
           <textarea class="cfg-textarea" id="cfg-prize-desc" placeholder="Ej: Acercate al stand para retirar tu regalo exclusivo."></textarea>
         </div>
         <div class="cfg-row">
+          <label class="cfg-label">Modo del juego de cajas</label>
+          <select class="cfg-input" id="cfg-box-mode">
+            <option value="event">Evento — 2 cajas ganadoras + 2da chance garantizada</option>
+            <option value="classic">Clásico — 1 caja ganadora, sin segunda chance</option>
+          </select>
+        </div>
+        <div class="cfg-row">
           <label class="cfg-label">Límite de premios por día</label>
           <input type="number" class="cfg-input" id="cfg-daily-limit" min="0" max="9999" placeholder="125">
         </div>
         <div class="cfg-row">
           <label class="cfg-label">Total de premios disponibles</label>
-          <input type="number" class="cfg-input" id="cfg-total-limit" min="0" max="99999" placeholder="400">
+          <input type="number" class="cfg-input" id="cfg-total-limit" min="0" max="99999" placeholder="499">
         </div>
       </div>
     </div>
@@ -1469,7 +1441,8 @@ const POOL = [
 let cfg = JSON.parse(localStorage.getItem('batev_cfg')) || {};
 cfg.prize      = cfg.prize      || { name: "¡Ganaste Merchandising de Mercado Libre!", description: "Acercate al stand para reclamar tu premio." };
 cfg.dailyLimit = cfg.dailyLimit || 125;
-cfg.totalLimit = cfg.totalLimit || 400;
+cfg.totalLimit = cfg.totalLimit || 499;
+cfg.boxMode    = cfg.boxMode    || 'event';
 
 // ── Prize tracking ────────────────────────────────────────────
 function loadTodayPrizes() {
@@ -1490,16 +1463,13 @@ function recordPrize() {
   localStorage.setItem('prizes_total', String(totalPrizes));
 }
 
-let round = [];          // 3 preguntas seleccionadas y barajadas
-let qIdx  = 0;           // pregunta actual (0-2)
-let user  = {};          // datos del participante
-let winBox = -1;         // índice de la caja ganadora
-let memoWins = [];       // índices ganadores en memotest
+let round = [];             // 3 preguntas seleccionadas y barajadas
+let qIdx  = 0;              // pregunta actual (0-2)
+let user  = {};             // datos del participante
+let winBoxes = [];          // índices de cajas ganadoras
+let boxSecondChance = false; // true cuando es la segunda oportunidad garantizada
 let idleTimer = null;
-let cdInterval = null;   // intervalo del countdown activo
-let secondChance = false; // si ya se usó la segunda chance este turno
-
-const SECOND_CHANCE_LIMIT = 80; // premios diarios hasta donde hay segunda chance
+let cdInterval = null;      // intervalo del countdown activo
 
 // ============================================================
 // UTILITIES
@@ -1650,9 +1620,11 @@ function checkForm() {
 // ============================================================
 function startRound() {
   user = {
-    nombre: document.getElementById('f-nombre').value.trim(),
-    tel:    document.getElementById('f-tel').value.trim(),
-    email:  document.getElementById('f-email').value.trim()
+    nombre:   document.getElementById('f-nombre').value.trim(),
+    tel:      document.getElementById('f-tel').value.trim(),
+    email:    document.getElementById('f-email').value.trim(),
+    profesion: document.getElementById('f-profesion').value.trim(),
+    empresa:  document.getElementById('f-empresa').value.trim()
   };
   round = shuffle(POOL).slice(0, 3).map(q => ({
     text: q.text,
@@ -1720,105 +1692,45 @@ function answer(idx) {
     if (qIdx < 3) {
       renderQuestion();
     } else {
-      enterGameSelect(false);
+      enterBoxGame();
     }
   }, delay);
-}
-
-// ============================================================
-// MEMOTEST
-// ============================================================
-const MEMO_SYMBOLS = ['🏠','🔧','🎨','💡','📐','⚡','🏗️','🪣'];
-
-function enterMemotest() {
-  // 9 cards: 3 winners (🎁) + 6 decoys from symbols pool
-  const decoys = shuffle(MEMO_SYMBOLS).slice(0, 6);
-  const cards = shuffle([...decoys, '🎁', '🎁', '🎁']);
-  memoWins = cards.reduce((acc, c, i) => { if (c === '🎁') acc.push(i); return acc; }, []);
-
-  const grid = document.getElementById('memo-grid');
-  grid.innerHTML = '';
-  cards.forEach((sym, i) => {
-    const card = document.createElement('div');
-    card.className = 'memo-card';
-    card.id = 'mc-' + i;
-    card.dataset.win = memoWins.includes(i) ? '1' : '0';
-    card.innerHTML = `
-      <div class="memo-card-front">${sym}</div>
-      <div class="memo-card-back">❓</div>
-    `;
-    card.onclick = () => pickMemoCard(i);
-    grid.appendChild(card);
-  });
-
-  document.getElementById('memo-title').textContent = '¡Memorizá!';
-  document.getElementById('memo-sub').textContent = 'Fijate dónde están los premios...';
-  goTo('s-memo');
-
-  // Phase 1: show face-up 3s
-  setTimeout(() => {
-    // Flip all face down
-    document.querySelectorAll('.memo-card').forEach(c => c.classList.add('disabled'));
-    document.getElementById('memo-title').textContent = 'Ahora elegí';
-    document.getElementById('memo-sub').textContent = '¿Dónde está el premio?';
-
-    // Shuffle visually: swap DOM children randomly
-    const children = Array.from(grid.children);
-    shuffle(children).forEach(c => grid.appendChild(c));
-
-    setTimeout(() => {
-      // Flip face down
-      document.querySelectorAll('.memo-card').forEach(c => {
-        c.classList.add('flipped');
-        c.classList.remove('disabled');
-      });
-    }, 400);
-  }, 3000);
-}
-
-function pickMemoCard(idx) {
-  document.querySelectorAll('.memo-card').forEach(c => {
-    c.classList.add('disabled');
-    c.onclick = null;
-  });
-
-  const picked = document.getElementById('mc-' + idx);
-  const isWin  = picked.dataset.win === '1';
-
-  // Mark all winners visible
-  document.querySelectorAll('.memo-card').forEach(c => {
-    if (c.dataset.win === '1') c.classList.add('winner-card');
-    else                       c.classList.add('loser-card');
-    c.classList.remove('flipped'); // reveal face-up
-  });
-
-  if (isWin) {
-    setTimeout(showPrize, 900);
-  } else {
-    saveLead('Perdió (memotest)');
-    setTimeout(showNoPrize, 1400);
-  }
-}
-
-// ============================================================
-// GAME OVER (wrong answer)
-// ============================================================
-function showGameOver(wrongQ) {
-  const correct = wrongQ.options.find(o => o.correct);
-  document.getElementById('go-q-text').textContent = wrongQ.text;
-  document.getElementById('go-answer').textContent = correct.text;
-  goTo('s-gameover');
-  startCD('go-cd-fill', 'go-cd-lbl', 8, () => { restart(); goTo('s-welcome'); resetIdle(); });
 }
 
 // ============================================================
 // BOX GAME
 // ============================================================
 function enterBoxGame() {
-  winBox = Math.floor(Math.random() * 3);
+  boxSecondChance = false;
+  const isClassic = cfg.boxMode === 'classic';
+  const positions = shuffle([0, 1, 2]);
+  winBoxes = isClassic ? [positions[0]] : [positions[0], positions[1]];
+
+  document.getElementById('boxes-title').textContent = '¡Elegí tu caja!';
+  document.getElementById('boxes-sub').textContent = isClassic
+    ? 'Solo una tiene el premio... ¿Cuál elegís?'
+    : 'Dos de las tres cajas tienen el premio. ¿Cuál elegís?';
+
   for (let i = 0; i < 3; i++) {
     const el = document.getElementById('box-' + i);
-    el.className    = 'box-card';
+    el.className = 'box-card';
+    el.querySelector('.box-emoji').textContent = '📦';
+    el.querySelector('.box-lbl').textContent   = 'Caja ' + (i + 1);
+    el.onclick = () => pickBox(i);
+  }
+  goTo('s-boxes');
+}
+
+function enterBoxSecondChance() {
+  boxSecondChance = true;
+  winBoxes = [0, 1, 2]; // todas las cajas ganan en la segunda chance
+
+  document.getElementById('boxes-title').textContent = '¡Segunda oportunidad!';
+  document.getElementById('boxes-sub').textContent = 'Elegí una caja y llevate el premio';
+
+  for (let i = 0; i < 3; i++) {
+    const el = document.getElementById('box-' + i);
+    el.className = 'box-card';
     el.querySelector('.box-emoji').textContent = '📦';
     el.querySelector('.box-lbl').textContent   = 'Caja ' + (i + 1);
     el.onclick = () => pickBox(i);
@@ -1835,7 +1747,7 @@ function pickBox(idx) {
 
   const picked = document.getElementById('box-' + idx);
 
-  if (idx === winBox) {
+  if (winBoxes.includes(idx)) {
     picked.classList.add('winner');
     picked.querySelector('.box-emoji').textContent = '🎁';
     picked.querySelector('.box-lbl').textContent   = '¡Premio!';
@@ -1844,12 +1756,19 @@ function pickBox(idx) {
     picked.classList.add('loser');
     picked.querySelector('.box-emoji').textContent = '✕';
     picked.querySelector('.box-lbl').textContent   = 'Vacía';
-    const w = document.getElementById('box-' + winBox);
-    w.classList.add('winner');
-    w.querySelector('.box-emoji').textContent = '🎁';
-    w.querySelector('.box-lbl').textContent   = '¡Aquí estaba!';
-    saveLead('Perdió (cajas)');
-    setTimeout(showNoPrize, 1400);
+    winBoxes.forEach(wi => {
+      const w = document.getElementById('box-' + wi);
+      w.classList.add('winner');
+      w.querySelector('.box-emoji').textContent = '🎁';
+      w.querySelector('.box-lbl').textContent   = '¡Aquí estaba!';
+    });
+    // En modo evento, primer intento perdido → segunda chance garantizada
+    if (cfg.boxMode !== 'classic' && !boxSecondChance && !prizesExhausted()) {
+      setTimeout(enterBoxSecondChance, 1800);
+    } else {
+      saveLead('Perdió (cajas)');
+      setTimeout(showNoPrize, 1400);
+    }
   }
 }
 
@@ -1860,7 +1779,7 @@ function showPrize() {
     return;
   }
   recordPrize();
-  saveLead('Ganó');
+  saveLead(boxSecondChance ? 'Ganó (2da chance)' : 'Ganó');
   document.getElementById('prize-name').textContent = cfg.prize.name;
   document.getElementById('prize-desc').textContent = cfg.prize.description;
   goTo('s-prize');
@@ -1868,34 +1787,11 @@ function showPrize() {
 }
 
 function showNoPrize(exhausted) {
-  // Segunda chance: si no se usó todavía, no hay agotamiento y el límite no se superó
-  if (!exhausted && !secondChance && todayPrizes.count < SECOND_CHANCE_LIMIT) {
-    secondChance = true;
-    enterGameSelect(true);
-    return;
-  }
-  secondChance = false;
   document.querySelector('#s-noprize .result-sub').innerHTML = exhausted
     ? 'Los premios del día se agotaron.<br>¡Volvé mañana a intentarlo!'
     : 'Esta vez el premio no apareció.<br>¡Seguí participando!';
   goTo('s-noprize');
   startCD('noprize-cd-fill', 'noprize-cd-lbl', 8, () => { restart(); goTo('s-welcome'); resetIdle(); });
-}
-
-function enterGameSelect(isSecond) {
-  const eyebrow = document.querySelector('#s-game-select .section-eyebrow');
-  const title   = document.querySelector('#s-game-select .section-title');
-  const sub     = document.querySelector('#s-game-select .section-sub');
-  if (isSecond) {
-    eyebrow.textContent = '¡Segunda oportunidad!';
-    title.textContent   = '¡Un intento más!';
-    sub.textContent     = 'Probá con el otro juego y llevate el premio';
-  } else {
-    eyebrow.textContent = '¡Trivia completada!';
-    title.textContent   = 'Elegí tu juego';
-    sub.textContent     = '¿Cuál preferís para jugar por el premio?';
-  }
-  goTo('s-game-select');
 }
 
 function resetDailyPrizes() {
@@ -1934,10 +1830,12 @@ function getLeads() { return JSON.parse(localStorage.getItem('batev_leads') || '
 function saveLead(resultado) {
   const leads = getLeads();
   leads.push({
-    date: new Date().toLocaleString('es-AR'),
-    nombre: user.nombre || '',
-    tel:    user.tel    || '',
-    email:  user.email  || '',
+    date:     new Date().toLocaleString('es-AR'),
+    nombre:   user.nombre   || '',
+    tel:      user.tel      || '',
+    email:    user.email    || '',
+    profesion: user.profesion || '',
+    empresa:  user.empresa  || '',
     resultado
   });
   localStorage.setItem('batev_leads', JSON.stringify(leads));
@@ -1948,9 +1846,9 @@ function saveLead(resultado) {
 // ============================================================
 function restart() {
   clearInterval(cdInterval);
-  ['f-nombre','f-tel','f-email'].forEach(id => { document.getElementById(id).value = ''; });
+  ['f-nombre','f-tel','f-email','f-profesion','f-empresa'].forEach(id => { document.getElementById(id).value = ''; });
   document.getElementById('btn-form-next').classList.remove('enabled');
-  user = {}; round = []; qIdx = 0; secondChance = false;
+  user = {}; round = []; qIdx = 0; boxSecondChance = false;
 }
 
 // ============================================================
@@ -1990,6 +1888,8 @@ function openAdmin() {
       <td>${l.nombre}</td>
       <td>${l.tel}</td>
       <td>${l.email || '—'}</td>
+      <td>${l.profesion || '—'}</td>
+      <td>${l.empresa || '—'}</td>
       <td>${l.resultado}</td>
     `;
     tbody.appendChild(tr);
@@ -1997,6 +1897,7 @@ function openAdmin() {
 
   document.getElementById('cfg-prize-name').value  = cfg.prize.name;
   document.getElementById('cfg-prize-desc').value  = cfg.prize.description;
+  document.getElementById('cfg-box-mode').value    = cfg.boxMode || 'event';
   document.getElementById('cfg-daily-limit').value = cfg.dailyLimit;
   document.getElementById('cfg-total-limit').value = cfg.totalLimit;
   document.getElementById('stat-today').textContent     = todayPrizes.count;
@@ -2033,8 +1934,9 @@ function switchTab(tab) {
 function saveConfig() {
   cfg.prize.name        = document.getElementById('cfg-prize-name').value.trim() || '¡Ganaste Merchandising de Mercado Libre!';
   cfg.prize.description = document.getElementById('cfg-prize-desc').value.trim();
+  cfg.boxMode           = document.getElementById('cfg-box-mode').value;
   cfg.dailyLimit        = parseInt(document.getElementById('cfg-daily-limit').value, 10) || 125;
-  cfg.totalLimit        = parseInt(document.getElementById('cfg-total-limit').value, 10) || 400;
+  cfg.totalLimit        = parseInt(document.getElementById('cfg-total-limit').value, 10) || 499;
   localStorage.setItem('batev_cfg', JSON.stringify(cfg));
   alert('Configuración guardada.');
 }
@@ -2042,9 +1944,9 @@ function saveConfig() {
 function exportCSV() {
   const leads = getLeads();
   if (!leads.length) { alert('No hay datos para exportar.'); return; }
-  let csv = 'Fecha,Nombre,Teléfono,Email,Resultado\n';
+  let csv = 'Fecha,Nombre,Teléfono,Email,Profesión,Empresa,Resultado\n';
   leads.forEach(l => {
-    csv += `"${l.date}","${l.nombre}","${l.tel}","${l.email}","${l.resultado}"\n`;
+    csv += `"${l.date}","${l.nombre}","${l.tel}","${l.email || ''}","${l.profesion || ''}","${l.empresa || ''}","${l.resultado}"\n`;
   });
   const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
   const a = document.createElement('a');
@@ -2167,31 +2069,22 @@ function stopConfetti() {
         });
       }, 80);
     }
-    if (id === 's-memo') {
-      setTimeout(() => {
-        document.querySelectorAll('.memo-card').forEach((c,i) => {
-          c.style.animation = `scaleIn .3s ${i*0.06}s ease both`;
-        });
-      }, 80);
-    }
-    if (id === 's-game-select') {
-      setTimeout(() => {
-        document.querySelectorAll('.game-select-card').forEach((c,i) => {
-          c.style.animation = `fadeUp .4s ${i*0.15}s ease both`;
-        });
-      }, 80);
-    }
   };
 
   // renderQuestion → stagger options after render
   const _rq = renderQuestion;
   renderQuestion = function() { _rq(); setTimeout(animateQuestion, 30); };
 
-  // enterBoxGame → clear float classes first
+  // enterBoxGame / enterBoxSecondChance → clear float classes first
   const _ebg = enterBoxGame;
   enterBoxGame = function() {
     document.querySelectorAll('.box-card').forEach(c => c.classList.remove('floating'));
     _ebg();
+  };
+  const _ebsc = enterBoxSecondChance;
+  enterBoxSecondChance = function() {
+    document.querySelectorAll('.box-card').forEach(c => c.classList.remove('floating'));
+    _ebsc();
   };
 
   // pickBox → stop float on pick
