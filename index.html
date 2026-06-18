@@ -737,7 +737,16 @@ input, textarea { user-select: text; -webkit-user-select: text; }
 .box-card:active { transform: scale(0.95); }
 .box-card.disabled { pointer-events: none; cursor: default; }
 
-.box-emoji { font-size: clamp(48px, 8.5vh, 96px); line-height: 1; }
+.box-img {
+  width: clamp(120px, 88%, 250px);
+  height: auto;
+  object-fit: contain;
+  display: block;
+  transition: opacity 0.3s, transform 0.3s;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.35));
+}
+.box-card.winner .box-img { filter: drop-shadow(0 4px 18px rgba(255,230,0,0.6)) brightness(1.08); }
+.box-card.loser  .box-img { opacity: 0.25; }
 .box-lbl {
   font-size: clamp(14px, 2.2vh, 26px);
   font-weight: 800;
@@ -1124,16 +1133,16 @@ input, textarea { user-select: text; -webkit-user-select: text; }
       <input type="tel" id="f-tel" placeholder="Ej: 11 5555-1234" oninput="checkForm()" autocomplete="off">
     </div>
     <div class="form-group">
-      <label>Email <span class="opt">(opcional)</span></label>
-      <input type="email" id="f-email" placeholder="tu@email.com" autocomplete="off">
+      <label>Email</label>
+      <input type="email" id="f-email" placeholder="tu@email.com" oninput="checkForm()" autocomplete="off">
     </div>
     <div class="form-group">
-      <label>Profesión / Oficio <span class="opt">(opcional)</span></label>
-      <input type="text" id="f-profesion" placeholder="Ej: Electricista, Plomero..." autocomplete="off">
+      <label>Profesión / Oficio</label>
+      <input type="text" id="f-profesion" placeholder="Ej: Electricista, Plomero..." oninput="checkForm()" autocomplete="off">
     </div>
     <div class="form-group">
-      <label>Empresa <span class="opt">(opcional)</span></label>
-      <input type="text" id="f-empresa" placeholder="Ej: Constructora XYZ" autocomplete="off">
+      <label>Empresa</label>
+      <input type="text" id="f-empresa" placeholder="Ej: Constructora XYZ" oninput="checkForm()" autocomplete="off">
     </div>
     <button class="btn-primary" id="btn-form-next" onclick="startRound()">Continuar →</button>
   </div>
@@ -1202,15 +1211,15 @@ input, textarea { user-select: text; -webkit-user-select: text; }
 
     <div class="boxes-row">
       <div class="box-card" id="box-0" onclick="pickBox(0)">
-        <div class="box-emoji">📦</div>
+        <img class="box-img" src="images/caja.png" alt="Caja 1">
         <div class="box-lbl">Caja 1</div>
       </div>
       <div class="box-card" id="box-1" onclick="pickBox(1)">
-        <div class="box-emoji">📦</div>
+        <img class="box-img" src="images/caja.png" alt="Caja 2">
         <div class="box-lbl">Caja 2</div>
       </div>
       <div class="box-card" id="box-2" onclick="pickBox(2)">
-        <div class="box-emoji">📦</div>
+        <img class="box-img" src="images/caja.png" alt="Caja 3">
         <div class="box-lbl">Caja 3</div>
       </div>
     </div>
@@ -1610,9 +1619,13 @@ function initSSControls() {
 // FORM
 // ============================================================
 function checkForm() {
-  const n = document.getElementById('f-nombre').value.trim();
-  const t = document.getElementById('f-tel').value.trim();
-  document.getElementById('btn-form-next').classList.toggle('enabled', n.length > 1 && t.length > 5);
+  const n   = document.getElementById('f-nombre').value.trim();
+  const t   = document.getElementById('f-tel').value.trim();
+  const e   = document.getElementById('f-email').value.trim();
+  const p   = document.getElementById('f-profesion').value.trim();
+  const emp = document.getElementById('f-empresa').value.trim();
+  document.getElementById('btn-form-next').classList.toggle('enabled',
+    n.length > 1 && t.length > 5 && e.length > 3 && p.length > 1 && emp.length > 1);
 }
 
 // ============================================================
@@ -1714,8 +1727,7 @@ function enterBoxGame() {
   for (let i = 0; i < 3; i++) {
     const el = document.getElementById('box-' + i);
     el.className = 'box-card';
-    el.querySelector('.box-emoji').textContent = '📦';
-    el.querySelector('.box-lbl').textContent   = 'Caja ' + (i + 1);
+    el.querySelector('.box-lbl').textContent = 'Caja ' + (i + 1);
     el.onclick = () => pickBox(i);
   }
   goTo('s-boxes');
@@ -1731,8 +1743,7 @@ function enterBoxSecondChance() {
   for (let i = 0; i < 3; i++) {
     const el = document.getElementById('box-' + i);
     el.className = 'box-card';
-    el.querySelector('.box-emoji').textContent = '📦';
-    el.querySelector('.box-lbl').textContent   = 'Caja ' + (i + 1);
+    el.querySelector('.box-lbl').textContent = 'Caja ' + (i + 1);
     el.onclick = () => pickBox(i);
   }
   goTo('s-boxes');
@@ -1749,18 +1760,15 @@ function pickBox(idx) {
 
   if (winBoxes.includes(idx)) {
     picked.classList.add('winner');
-    picked.querySelector('.box-emoji').textContent = '🎁';
-    picked.querySelector('.box-lbl').textContent   = '¡Premio!';
+    picked.querySelector('.box-lbl').textContent = '¡Premio!';
     setTimeout(showPrize, 900);
   } else {
     picked.classList.add('loser');
-    picked.querySelector('.box-emoji').textContent = '✕';
-    picked.querySelector('.box-lbl').textContent   = 'Vacía';
+    picked.querySelector('.box-lbl').textContent = 'Vacía';
     winBoxes.forEach(wi => {
       const w = document.getElementById('box-' + wi);
       w.classList.add('winner');
-      w.querySelector('.box-emoji').textContent = '🎁';
-      w.querySelector('.box-lbl').textContent   = '¡Aquí estaba!';
+      w.querySelector('.box-lbl').textContent = '¡Aquí estaba!';
     });
     // En modo evento, primer intento perdido → segunda chance garantizada
     if (cfg.boxMode !== 'classic' && !boxSecondChance && !prizesExhausted()) {
