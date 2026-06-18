@@ -1262,7 +1262,7 @@ input, textarea { user-select: text; -webkit-user-select: text; }
 <!-- ============================================================
      PRIZE — ganó
 ============================================================ -->
-<div class="screen" id="s-prize" style="position:relative;" onclick="stopConfetti(); restart(); goTo('s-welcome'); resetIdle();">
+<div class="screen" id="s-prize" onclick="stopConfetti(); restart(); goTo('s-welcome'); resetIdle();">
 <canvas id="confetti-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;background:transparent;"></canvas>
   <div class="prize-logos" style="position:relative;z-index:1;">
     <img class="logo-img" src="images/logo-ml.svg" alt="ML"
