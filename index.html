@@ -301,6 +301,32 @@ input, textarea { user-select: text; -webkit-user-select: text; }
 .form-group input:focus { border-color: var(--navy); background: var(--white); }
 .form-group input::placeholder { color: #ccc; font-weight: 500; }
 
+/* YES/NO TOGGLE */
+.yn-group { display: flex; flex-direction: column; gap: 1.2vh; }
+.yn-group label {
+  font-size: clamp(12px, 1.7vh, 19px);
+  font-weight: 800;
+  color: var(--dark);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.yn-btns { display: flex; gap: clamp(10px, 1.5vw, 20px); }
+.yn-btn {
+  flex: 1;
+  padding: clamp(14px, 2.2vh, 26px);
+  font-family: inherit;
+  font-size: clamp(16px, 2.6vh, 30px);
+  font-weight: 700;
+  border: 2.5px solid var(--border);
+  border-radius: 18px;
+  background: var(--bg);
+  color: var(--gray);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.yn-btn.selected-yes { border-color: var(--green); background: var(--green); color: var(--white); }
+.yn-btn.selected-no  { border-color: var(--red);   background: var(--red);   color: var(--white); }
+
 .btn-primary {
   width: 100%;
   background: var(--navy);
@@ -1144,6 +1170,13 @@ input, textarea { user-select: text; -webkit-user-select: text; }
       <label>Empresa</label>
       <input type="text" id="f-empresa" placeholder="Ej: Constructora XYZ" oninput="checkForm()" autocomplete="off">
     </div>
+    <div class="yn-group">
+      <label>¿Vendés a través de Mercado Libre?</label>
+      <div class="yn-btns">
+        <button type="button" class="yn-btn" id="yn-si" onclick="selectYN('si')">✔ Sí</button>
+        <button type="button" class="yn-btn" id="yn-no" onclick="selectYN('no')">✖ No</button>
+      </div>
+    </div>
     <button class="btn-primary" id="btn-form-next" onclick="startRound()">Continuar →</button>
   </div>
 </div>
@@ -1299,6 +1332,7 @@ input, textarea { user-select: text; -webkit-user-select: text; }
               <th>Email</th>
               <th>Profesión</th>
               <th>Empresa</th>
+              <th>Vende ML</th>
               <th>Resultado</th>
             </tr>
           </thead>
@@ -1618,6 +1652,15 @@ function initSSControls() {
 // ============================================================
 // FORM
 // ============================================================
+let vendeMeli = null; // 'si' | 'no' | null
+
+function selectYN(val) {
+  vendeMeli = val;
+  document.getElementById('yn-si').className = 'yn-btn' + (val === 'si' ? ' selected-yes' : '');
+  document.getElementById('yn-no').className = 'yn-btn' + (val === 'no' ? ' selected-no'  : '');
+  checkForm();
+}
+
 function checkForm() {
   const n   = document.getElementById('f-nombre').value.trim();
   const t   = document.getElementById('f-tel').value.trim();
@@ -1625,7 +1668,7 @@ function checkForm() {
   const p   = document.getElementById('f-profesion').value.trim();
   const emp = document.getElementById('f-empresa').value.trim();
   document.getElementById('btn-form-next').classList.toggle('enabled',
-    n.length > 1 && t.length > 5 && e.length > 3 && p.length > 1 && emp.length > 1);
+    n.length > 1 && t.length > 5 && e.length > 3 && p.length > 1 && emp.length > 1 && vendeMeli !== null);
 }
 
 // ============================================================
@@ -1633,11 +1676,12 @@ function checkForm() {
 // ============================================================
 function startRound() {
   user = {
-    nombre:   document.getElementById('f-nombre').value.trim(),
-    tel:      document.getElementById('f-tel').value.trim(),
-    email:    document.getElementById('f-email').value.trim(),
+    nombre:    document.getElementById('f-nombre').value.trim(),
+    tel:       document.getElementById('f-tel').value.trim(),
+    email:     document.getElementById('f-email').value.trim(),
     profesion: document.getElementById('f-profesion').value.trim(),
-    empresa:  document.getElementById('f-empresa').value.trim()
+    empresa:   document.getElementById('f-empresa').value.trim(),
+    vendeMeli: vendeMeli === 'si' ? 'Sí' : 'No'
   };
   round = shuffle(POOL).slice(0, 3).map(q => ({
     text: q.text,
@@ -1838,12 +1882,13 @@ function getLeads() { return JSON.parse(localStorage.getItem('batev_leads') || '
 function saveLead(resultado) {
   const leads = getLeads();
   leads.push({
-    date:     new Date().toLocaleString('es-AR'),
-    nombre:   user.nombre   || '',
-    tel:      user.tel      || '',
-    email:    user.email    || '',
+    date:      new Date().toLocaleString('es-AR'),
+    nombre:    user.nombre    || '',
+    tel:       user.tel       || '',
+    email:     user.email     || '',
     profesion: user.profesion || '',
-    empresa:  user.empresa  || '',
+    empresa:   user.empresa   || '',
+    vendeMeli: user.vendeMeli || '',
     resultado
   });
   localStorage.setItem('batev_leads', JSON.stringify(leads));
@@ -1855,7 +1900,10 @@ function saveLead(resultado) {
 function restart() {
   clearInterval(cdInterval);
   ['f-nombre','f-tel','f-email','f-profesion','f-empresa'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('yn-si').className = 'yn-btn';
+  document.getElementById('yn-no').className = 'yn-btn';
   document.getElementById('btn-form-next').classList.remove('enabled');
+  vendeMeli = null;
   user = {}; round = []; qIdx = 0; boxSecondChance = false;
 }
 
@@ -1898,6 +1946,7 @@ function openAdmin() {
       <td>${l.email || '—'}</td>
       <td>${l.profesion || '—'}</td>
       <td>${l.empresa || '—'}</td>
+      <td>${l.vendeMeli || '—'}</td>
       <td>${l.resultado}</td>
     `;
     tbody.appendChild(tr);
@@ -1952,9 +2001,9 @@ function saveConfig() {
 function exportCSV() {
   const leads = getLeads();
   if (!leads.length) { alert('No hay datos para exportar.'); return; }
-  let csv = 'Fecha,Nombre,Teléfono,Email,Profesión,Empresa,Resultado\n';
+  let csv = 'Fecha,Nombre,Teléfono,Email,Profesión,Empresa,Vende en ML,Resultado\n';
   leads.forEach(l => {
-    csv += `"${l.date}","${l.nombre}","${l.tel}","${l.email || ''}","${l.profesion || ''}","${l.empresa || ''}","${l.resultado}"\n`;
+    csv += `"${l.date}","${l.nombre}","${l.tel}","${l.email || ''}","${l.profesion || ''}","${l.empresa || ''}","${l.vendeMeli || ''}","${l.resultado}"\n`;
   });
   const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
   const a = document.createElement('a');
