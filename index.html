@@ -1351,6 +1351,10 @@ input, textarea { user-select: text; -webkit-user-select: text; }
           <textarea class="cfg-textarea" id="cfg-prize-desc" placeholder="Ej: Acercate al stand para retirar tu regalo exclusivo."></textarea>
         </div>
         <div class="cfg-row">
+          <label class="cfg-label">Tiempo de inactividad antes del screensaver (segundos)</label>
+          <input type="number" class="cfg-input" id="cfg-idle-timeout" min="30" max="3600" placeholder="180">
+        </div>
+        <div class="cfg-row">
           <label class="cfg-label">Modo del juego de cajas</label>
           <select class="cfg-input" id="cfg-box-mode">
             <option value="event">Evento — 2 cajas ganadoras + 2da chance garantizada</option>
@@ -1485,7 +1489,8 @@ let cfg = JSON.parse(localStorage.getItem('batev_cfg')) || {};
 cfg.prize      = cfg.prize      || { name: "¡Ganaste Merchandising de Mercado Libre!", description: "Acercate al stand para reclamar tu premio." };
 cfg.dailyLimit = cfg.dailyLimit || 125;
 cfg.totalLimit = cfg.totalLimit || 499;
-cfg.boxMode    = cfg.boxMode    || 'event';
+cfg.boxMode      = cfg.boxMode      || 'event';
+cfg.idleTimeout  = cfg.idleTimeout  || 180;
 
 // ── Prize tracking ────────────────────────────────────────────
 function loadTodayPrizes() {
@@ -1536,7 +1541,7 @@ function goTo(id) {
 // ============================================================
 function resetIdle() {
   clearTimeout(idleTimer);
-  idleTimer = setTimeout(openScreensaver, 60000);
+  idleTimer = setTimeout(openScreensaver, cfg.idleTimeout * 1000);
 }
 
 document.addEventListener('touchstart', () => {
@@ -1952,9 +1957,10 @@ function openAdmin() {
     tbody.appendChild(tr);
   });
 
-  document.getElementById('cfg-prize-name').value  = cfg.prize.name;
-  document.getElementById('cfg-prize-desc').value  = cfg.prize.description;
-  document.getElementById('cfg-box-mode').value    = cfg.boxMode || 'event';
+  document.getElementById('cfg-prize-name').value    = cfg.prize.name;
+  document.getElementById('cfg-prize-desc').value    = cfg.prize.description;
+  document.getElementById('cfg-idle-timeout').value  = cfg.idleTimeout || 180;
+  document.getElementById('cfg-box-mode').value      = cfg.boxMode || 'event';
   document.getElementById('cfg-daily-limit').value = cfg.dailyLimit;
   document.getElementById('cfg-total-limit').value = cfg.totalLimit;
   document.getElementById('stat-today').textContent     = todayPrizes.count;
@@ -1991,6 +1997,7 @@ function switchTab(tab) {
 function saveConfig() {
   cfg.prize.name        = document.getElementById('cfg-prize-name').value.trim() || '¡Ganaste Merchandising de Mercado Libre!';
   cfg.prize.description = document.getElementById('cfg-prize-desc').value.trim();
+  cfg.idleTimeout       = parseInt(document.getElementById('cfg-idle-timeout').value, 10) || 180;
   cfg.boxMode           = document.getElementById('cfg-box-mode').value;
   cfg.dailyLimit        = parseInt(document.getElementById('cfg-daily-limit').value, 10) || 125;
   cfg.totalLimit        = parseInt(document.getElementById('cfg-total-limit').value, 10) || 499;
