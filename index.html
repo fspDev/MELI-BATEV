@@ -832,7 +832,12 @@ input, textarea { user-select: text; -webkit-user-select: text; }
   justify-content: center;
   gap: 3vh;
 }
-.prize-icon { font-size: clamp(72px, 13vh, 140px); }
+.prize-brand-logo {
+  width: clamp(260px, 72vw, 820px);
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 6px 24px rgba(45,50,119,0.18));
+}
 .prize-eyebrow {
   font-size: clamp(13px, 2vh, 22px);
   font-weight: 700;
@@ -1270,7 +1275,7 @@ input, textarea { user-select: text; -webkit-user-select: text; }
   </div>
 
   <div class="prize-main prize-pop" style="position:relative;z-index:1;">
-    <div class="prize-icon">🎉</div>
+    <img class="prize-brand-logo" src="images/logo-mlc.svg" alt="Mercado Libre">
     <div class="prize-eyebrow">¡Felicitaciones!</div>
     <div class="prize-title" id="prize-name">¡GANASTE!</div>
     <p class="prize-desc" id="prize-desc">Acercate al stand para reclamar tu premio.</p>
